@@ -15,6 +15,8 @@ Locally or in the cloud.
 - stored and managed in one place: update only once 
 - can be worse performance. merging of data through a query
 
+- Visual Tool posSQL, for mac: SequelPRO
+
 ### Tutorial
 - [4 hour youtube](https://www.youtube.com/watch?v=HXV3zeQKqGY)
 
