@@ -14,7 +14,7 @@ To connect run:
 
 - or  
 
-` mysql -u root -D name_of_database -p ` to select db when logging in
+` mysql -u root -D name_of_database` to select db when logging in
 
 - Add password with ALTER USER 'root'@'localhost' IDENTIFIED BY 'password'; 
 
@@ -51,6 +51,10 @@ SHOW databases;
 - get the name of the currently connected database 
 
 ``` select database() ```
+
+- show tables in currect database
+
+```show tables; ```
 
 
 - Create database
@@ -174,3 +178,149 @@ FOREIGN KEY(manager_id) REFERENCES employee(empl_id) ON DELETE SET NULL
 -- alternatively: ON DELETE SET CASCADE
 ```
 
+- Same thing
+
+```
+SELECT employee.first_name
+FROM employees
+
+and
+
+SELECT first_name
+FROM employee 
+```
+
+
+### Union
+
+- Union = combine the results of multiple select statements into one
+
+```
+SELECT first_name  
+FROM employee
+UNION 
+SELECT branch_name 
+FROM branch;
+```
+
+- Good idea to add AS new_column_name to the first statement (SELECT first_name). Otherwise the resulted table has the name of the column from first SELECT statement 
+
+- Only works from same num of columns: no select firstname, lastname ... UNION SELECT branchname
+
+- works for columns with same datatypes 
+
+
+### JOIN
+
+- combining rows from two or more tables based on a related columns between them: 
+
+- **INNER JOIN**: 
+- combine rows only when they have a shared column in common
+    - only employees whos id's matched the id's in branch.mgr_id were selected 
+
+```
+-- find all branches  and the names of their managers 
+SELECT employee.emp_id, employee.first_name, branch.branch_name  
+FROM employee 
+JOIN branch 
+ON employee.emp_id = branch.mgr_id;
+
+out: 
+
++--------+------------+-------------+
+| emp_id | first_name | branch_name |
++--------+------------+-------------+
+|    100 | David      | Corporate   |
+|    102 | Michael    | Scranton    |
+|    106 | Josh       | Stamford    |
++--------+------------+-------------+
+
+``` 
+
+- **LEFT JOIN**
+- All of the rows from the first column specified will be included
+
+```
+SELECT employee.emp_id, employee.first_name, branch.branch_name  
+FROM employee 
+LEFT JOIN branch 
+ON employee.emp_id = branch.mgr_id;
+
+out:
+
++--------+------------+-------------+
+| emp_id | first_name | branch_name |
++--------+------------+-------------+
+|    100 | David      | Corporate   |
+|    102 | Michael    | Scranton    |
+|    106 | Josh       | Stamford    |
+|    101 | Jan        | NULL        |
+|    103 | Angela     | NULL        |
+|    104 | Kelly      | NULL        |
+|    105 | Stanley    | NULL        |
+|    107 | Andy       | NULL        |
+|    108 | Jim        | NULL        |
++--------+------------+-------------+
+
+```
+
+- **RIGHT JOIN**
+- Includes all of the rows from right table
+
+```
+SELECT employee.emp_id, employee.first_name, branch.branch_name  
+FROM employee 
+RIGHT JOIN branch 
+ON employee.emp_id = branch.mgr_id;
+
+out 
+
++--------+------------+-------------+
+| emp_id | first_name | branch_name |
++--------+------------+-------------+
+|    100 | David      | Corporate   |
+|    102 | Michael    | Scranton    |
+|    106 | Josh       | Stamford    |
+|   NULL | NULL       | Buffalo     |
++--------+------------+-------------+
+``` 
+
+- **FULL OUTER JOIN**
+- grab all of the employees and all of the branches no matter if they met the condition `ON employee.emp_id = branch.mgr_id;` or not
+- not possible in mysql
+
+
+### Nested Queries 
+- One query informing another query. We just use the results from one query to get the results from another.
+
+- A subquery is a SELECT statement that is nested within another SELECT statement and which return intermediate results. SQL executes innermost subquery first, then next level is applied to the results of the subquery. 
+```
+-- Find names of all employees who have sold over 30000 to a single client
+-- In works_with we have the emp_id and their total sales, but not their names. In employee we have their names
+SELECT employee.first_name, employee.last_name
+FROM employee
+WHERE employee.emp_id IN (
+    SELECT works_with.emp_id
+    FROM works_with
+    WHERE works_with.total_sales > 30000
+);
+```
+
+- Find all clients who are handled by the branch that Michael Scott manages. Assume you know Michael's id. 
+
+- Tip: first write the inner loop to find branch that michael manages. then add outer loop to find clients that are handled by that branch 
+- IN is used if the return of the inner code returns more than one element. (=Michael manages more than one branch). 
+- = is used if the inner statement returns just one element
+
+```
+SELECT client.client_name 
+FROM client 
+WHERE client.branch_id = (
+    SELECT branch.branch_id
+    FROM branch
+    WHERE mgr_id = 102
+    LIMIT 1  -- michael may manage more branches 
+);
+```
+
+### ON DELETE
