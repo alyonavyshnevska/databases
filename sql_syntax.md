@@ -323,4 +323,10 @@ WHERE client.branch_id = (
 );
 ```
 
-### ON DELETE
+### ON DELETE  
+
+- When defining foreign keys in a table you need to specify ON DELETE 
+    - SET NULL: if the foreign_key  refers to a row in another table, and that row gets deleted: set this value to NULL
+    - CASCADE: the row in this table also gets deleted 
+
+### next: Triggers
